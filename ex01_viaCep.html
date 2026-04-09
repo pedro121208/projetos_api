@@ -39,9 +39,83 @@
 </head>
 <body>
     <!-- Container -->
-    
+    <div class="container">
+        <div class="custom-form">
+            <h3 class="form-title">Buscar endereço</h3>
+            <form>
+                <div class="mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <input type="text" class="form-control" id="cep" placeholder="Digite o seu CEP" onblur="pesquisaCEP(this.value)">
+                </div>
+
+                <div class="mb-3">
+                    <label for="rua" class="form-label">Rua</label>
+                    <input type="text" class="form-control" id="rua" placeholder="Rua" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cidade" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="cidade" placeholder="Cidade" readonly>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Script JS -->
-    
+    <script>
+        // Função para limpar os campos caso o CEP seja inválido ou apagado
+        function limparFormularioCEP() {
+            document.getElementById('rua').value = "";  // Valor vazio para limpar o campo
+            document.getElementById('cidade').value = "";  // Valor vazio para limpar o campo
+        }
+
+        // Função moderna usando 'async' para permitir o uso do 'await' (as coisas acontecem em paralelo)
+        async function pesquisaCEP(valor) {
+            // Regex: /D remove tudo o que não for número | g continuar percorrendo toda a string
+            const cep = valor.replace(/\D/, '');
+
+            if (cep !== "") {
+                // Regex: para validar CEP com 8 dígitos
+                const validacep = /^[0-9]{8}$/;
+               
+                if (validacep.test(cep)) {
+                    // Feedback visual (carregando) enqunto a requisição é feita
+                    document.getElementById('rua').value = "..."
+                    document.getElementById('cidade').value = "..."
+
+                    // Bloco try-catch: padrão para tratamento de erros em chamadas externas
+                    try {
+                        // fetch(): A forma moderna de fazer requisições na web (traz os dados)
+                        const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+
+                        // Converte a resposta textual da API em um objeto JavaScript real
+                        const conteudo = await resposta.json();
+
+                        if (!("erro" in conteudo)) {
+                            document.getElementById('rua').value = conteudo.logradouro;
+                            document.getElementById('cidade').value = conteudo.localidade;
+                        } else {
+                            // CEP possui 8 números, mas não existe na base dos Correios
+                            limparFormularioCEP();
+                            alert("CEP não encontrado.");
+                        }
+                    } catch (erro) {
+                        // Chega aqui se a internet cair ou se o servidor viacep estiver fora do ar
+                        limparFormularioCEP();
+                        alert("Erro ao tentar buscar o CEP. Verifique sua conexão");
+                        console.error ("Detalhe ao erro:", erro);
+                    }
+                } else {
+                    // CEP com formato inválido (ex. menos que 8 números)
+                    limparFormularioCEP();
+                    alert("Formato de CEP inválido.");
+                }
+            } else {
+                // Usuário apagou o conteúdo do campo
+                limparFormularioCEP();
+            }
+        }
+    </script>
+   
 </body>
 </html>

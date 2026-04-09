@@ -7,10 +7,76 @@
 </head>
 <body class="bg-light d-flex justify-content-center align-items-center vh-100">
 
-    <!-- Card -->
-    
-    
-    <!-- Script JS -->
-    
+       <div class="card p-4 shadow-sm" style="width: 25rem;">
+        <h4 class="text-center mb-4">Onde você mora?</h4>
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">Estado</label>
+            <select id="estado" class="form-select" onchange="carregarCidades(this.value)">
+                <option value="">Selecione um Estado...</option>
+                </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Cidade</label>
+            <select id="cidade" class="form-select" disabled>
+                <option value="">Aguardando estado...</option>
+                </select>
+        </div>
+    </div>
+
+    <script>
+        // Executa assim que a página é aberta
+        window.onload = async function() {
+            try {
+                const resposta = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+                const estados = await resposta.json();
+                
+                const selectEstado = document.getElementById('estado');
+                
+                // Laço de repetição para criar as opções
+                estados.forEach(estado => {
+                    const opcao = document.createElement('option');
+                    opcao.value = estado.sigla;
+                    opcao.innerText = `${estado.nome} (${estado.sigla})`;
+                    selectEstado.appendChild(opcao);
+                });
+            } catch (erro) {
+                console.error("Erro ao carregar estados", erro);
+            }
+        }
+
+        // Executa quando o usuário escolhe um estado
+        async function carregarCidades(uf) {
+            const selectCidade = document.getElementById('cidade');
+            
+            if (!uf) {
+                selectCidade.innerHTML = '<option value="">Aguardando estado...</option>';
+                selectCidade.disabled = true;
+                return;
+            }
+
+            selectCidade.disabled = false;
+            selectCidade.innerHTML = '<option value="">Carregando...</option>';
+
+            try {
+                const resposta = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+                const cidades = await resposta.json();
+                
+                selectCidade.innerHTML = '<option value="">Selecione a cidade...</option>';
+                
+                cidades.forEach(cidade => {
+                    const opcao = document.createElement('option');
+                    opcao.value = cidade.nome;
+                    opcao.innerText = cidade.nome;
+                    selectCidade.appendChild(opcao);
+                });
+            } catch (erro) {
+                console.error("Erro ao carregar cidades", erro);
+                selectCidade.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+    </script>
+
 </body>
 </html>

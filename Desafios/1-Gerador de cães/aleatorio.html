@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Cães</title>
+    <style>
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            /* Fundo com gradiente quente e alegre */
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: #4a4a4a;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            /* Sombra mais suave e espalhada */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            /* Pequeno efeito de flutuação ao passar o mouse no cartão */
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #ff6b6b;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        img {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            /* Borda branca com sombra para destacar a foto */
+            border: 5px solid #ffffff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background-color: #f9f9f9;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            /* Botão com gradiente */
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8b);
+            color: white;
+            border: none;
+            border-radius: 50px; /* Bordas bem arredondadas */
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff5252, #ff7676);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+            transform: scale(1.05); /* Aumenta um pouco ao passar o mouse */
+        }
+
+        button:active {
+            transform: scale(0.95); /* Efeito de clique */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Gerador de Cães 🐾</h2>
+        
+        <img id="foto-cao" src="https://via.placeholder.com/300x300/eeeeee/999999?text=Carregando+fofura..." alt="Foto de um cachorro">
+        
+        <br>
+        
+        <button id="btn-gerar">Gerar Cão</button>
+    </div>
+
+    <script>
+        // 1. Mapeando os elementos do HTML
+        const imgElement = document.getElementById('foto-cao');
+        const btnElement = document.getElementById('btn-gerar');
+
+        // 2. Definindo a função de busca
+        function gerarDoguinho() {
+            // Efeito visual de carregamento na imagem
+            imgElement.style.opacity = '0.5';
+            btnElement.innerText = "Buscando...";
+
+            // Fazendo a requisição para a API
+            fetch('https://dog.ceo/api/breeds/image/random')
+                .then(resposta => resposta.json())
+                .then(dados => {
+                    imgElement.src = dados.message;
+                    
+                    // Só volta a opacidade e o texto quando a imagem realmente carregar
+                    imgElement.onload = () => {
+                        imgElement.style.opacity = '1';
+                        btnElement.innerText = "Gerar Novo Cão";
+                    };
+                })
+                .catch(erro => {
+                    console.error("Erro ao consultar a API:", erro);
+                    alert("Ops! Algo deu errado ao buscar o cãozinho.");
+                    imgElement.style.opacity = '1';
+                    btnElement.innerText = "Tentar Novamente";
+                });
+        }
+
+        // 3. Adicionando o "escutador" de eventos no botão
+        btnElement.addEventListener('click', gerarDoguinho);
+
+        // Opcional: Já carregar um cachorro assim que a página abrir
+        window.onload = gerarDoguinho;
+    </script>
+
+</body>
+</html>
